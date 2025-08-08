@@ -341,8 +341,11 @@
             const width = margin * 2 + tilesPerRow * drawRectWidth + (tilesPerRow - 1) * spacing;
             const height = margin * 2 + tilesPerCol * drawRectHeight + (tilesPerCol - 1) * spacing;
 
-            // // name="tileset-grid (20)" tilewidth="64" tileheight="32" spacing="8" margin="8" tilecount="64" columns="8">
-            const tsx = `<?xml version="1.0" encoding="UTF-8"?>\n<tileset version="1.10" tiledversion="1.10.2" name="tileset" tilewidth="${drawRectWidth}" tileheight="${drawRectHeight}" tilecount="${tilesPerRow * tilesPerCol}" columns="${tilesPerRow} spacing=${spacing} margin=${margin}">\n <image source="tileset.png" width="${width}" height="${height}"/>\n</tileset>`;
+            tsx = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+            tsx += `<tileset version="1.10" tiledversion="1.10.2" name="tileset" tilewidth="${drawRectWidth}" tileheight="${drawRectHeight}" tilecount="${tilesPerRow * tilesPerCol}" columns="${tilesPerRow}" spacing="${spacing}" margin="${margin}">\n`;
+            tsx += `<tileoffset x="-${drawPadding}" y="${drawPadding}"/>\n`;
+            tsx += `<image source="tileset.png" width="${width}" height="${height}"/>\n`;
+            tsx += `</tileset>`;
             const blob = new Blob([tsx], { type: 'application/xml' });
             const link = document.createElement('a');
             link.download = 'tileset.tsx';
