@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tileset Reference Grid Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f7f7f7;
+        }
+
+        .container {
+            background: #fff;
+            padding: 24px 32px 32px 32px;
+            border-radius: 12px;
+            box-shadow: 0 2px 16px #0001;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .inputs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .inputs label {
+            display: flex;
+            flex-direction: column;
+            font-size: 14px;
+        }
+
+        .inputs input {
+            padding: 6px 8px;
+            font-size: 15px;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            margin-top: 4px;
+            width: 90px;
+        }
+
+        .actions {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 22px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #125ea7;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: #fff;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            box-shadow: 0 1px 8px #0002;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            .inputs {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Tileset Reference Grid Generator</h1>
+        <form id="gridForm" class="inputs" onsubmit="return false;">
+            <label>Grid Type
+                <select id="gridType">
+                    <option value="orthogonal">Orthogonal</option>
+                    <option value="dimetric">Dimetric (2:1 Pixel Ratio)</option>
+                </select>
+            </label>
+            <label>Tile Width
+                <input type="number" id="tileWidth" min="1" value="32" required>
+            </label>
+            <label>Tile Height
+                <input type="number" id="tileHeight" min="1" value="32" required>
+            </label>
+            <label>Margin
+                <input type="number" id="margin" min="0" value="8" required>
+            </label>
+            <label>Spacing
+                <input type="number" id="spacing" min="0" value="2" required>
+            </label>
+            <label>Tiles per Row
+                <input type="number" id="tilesPerRow" min="1" value="8" required>
+            </label>
+            <label>Tiles per Column
+                <input type="number" id="tilesPerCol" min="1" value="8" required>
+            </label>
+        </form>
+        <div class="actions">
+            <button id="drawBtn">Draw Grid</button>
+            <button id="exportPngBtn" type="button">Export to PNG</button>
+        </div>
+        <canvas id="tilesetCanvas" width="600" height="600"></canvas>
+    </div>
+    <script>
+        const form = document.getElementById('gridForm');
+        const canvas = document.getElementById('tilesetCanvas');
+        const ctx = canvas.getContext('2d');
+        const drawBtn = document.getElementById('drawBtn');
+        const exportPngBtn = document.getElementById('exportPngBtn');
+
+
+
+        function getInputs() {
+            return {
+                gridType: document.getElementById('gridType').value,
+                tileWidth: parseInt(document.getElementById('tileWidth').value, 10),
+                tileHeight: parseInt(document.getElementById('tileHeight').value, 10),
+                margin: parseInt(document.getElementById('margin').value, 10),
+                spacing: parseInt(document.getElementById('spacing').value, 10),
+                tilesPerRow: parseInt(document.getElementById('tilesPerRow').value, 10),
+                tilesPerCol: parseInt(document.getElementById('tilesPerCol').value, 10)
+            };
+        }
+
+        // Save current state to localStorage
+        function saveState() {
+            const state = getInputs();
+            localStorage.setItem('tilesetGridState', JSON.stringify(state));
+        }
+
+        // Restore state from localStorage
+        function restoreState() {
+            const stateStr = localStorage.getItem('tilesetGridState');
+            if (!stateStr) return;
+            try {
+                const state = JSON.parse(stateStr);
+                if (state.gridType) document.getElementById('gridType').value = state.gridType;
+                if (state.tileWidth) document.getElementById('tileWidth').value = state.tileWidth;
+                if (state.tileHeight) document.getElementById('tileHeight').value = state.tileHeight;
+                if (state.margin !== undefined) document.getElementById('margin').value = state.margin;
+                if (state.spacing !== undefined) document.getElementById('spacing').value = state.spacing;
+                if (state.tilesPerRow) document.getElementById('tilesPerRow').value = state.tilesPerRow;
+                if (state.tilesPerCol) document.getElementById('tilesPerCol').value = state.tilesPerCol;
+            } catch (e) { }
+        }
+
+        function drawGrid() {
+            const { gridType, tileWidth, tileHeight, margin, spacing, tilesPerRow, tilesPerCol } = getInputs();
+            let width, height;
+            ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+
+            if (gridType === 'orthogonal') {
+                width = margin * 2 + tilesPerRow * tileWidth + (tilesPerRow - 1) * spacing;
+                height = margin * 2 + tilesPerCol * tileHeight + (tilesPerCol - 1) * spacing;
+                canvas.width = width;
+                canvas.height = height;
+
+                ctx.clearRect(0, 0, width, height);
+
+                // Draw filled tiles with alternating shades
+                const colorA = '#e3eafc';
+                const colorB = '#b6c8e6';
+                for (let row = 0; row < tilesPerCol; row++) {
+                    for (let col = 0; col < tilesPerRow; col++) {
+                        const x = margin + col * (tileWidth + spacing);
+                        const y = margin + row * (tileHeight + spacing);
+                        const isEven = (row + col) % 2 === 0;
+                        ctx.fillStyle = isEven ? colorA : colorB;
+                        ctx.fillRect(x, y, tileWidth, tileHeight);
+                    }
+                }
+            } else if (gridType === 'dimetric') {
+                // For Dimetric, user input is tileHeight (vertical height from top to bottom), width is always double the height
+                const diamondHeight = tileHeight;
+                const diamondWidth = tileHeight * 2;
+                // The cell size is diamondWidth x diamondHeight
+                width = margin * 2 + tilesPerRow * diamondWidth + (tilesPerRow - 1) * spacing;
+                height = margin * 2 + tilesPerCol * diamondHeight + (tilesPerCol - 1) * spacing;
+                canvas.width = width;
+                canvas.height = height;
+
+                ctx.clearRect(0, 0, width, height);
+
+                const colorA = '#e3eafc';
+                const colorB = '#b6c8e6';
+                for (let row = 0; row < tilesPerCol; row++) {
+                    for (let col = 0; col < tilesPerRow; col++) {
+                        // Center of each diamond in an Orthogonal grid cell
+                        const cellX = margin + col * (diamondWidth + spacing);
+                        const cellY = margin + row * (diamondHeight + spacing);
+
+                        const isEven = (row + col) % 2 === 0;
+                        // Pixel-perfect fill of the diamond using scanlines (classic Dimetric diamond)
+                        const fillColor = isEven ? colorA : colorB;
+                        ctx.fillStyle = isEven ? colorA : colorB;
+                        // Diamond vertices (all integer math)
+                        const halfW = diamondWidth / 2;
+                        const halfH = diamondHeight / 2;
+                        const left = [cellX, cellY + halfH];
+
+                        for (let dy = 0; dy < halfH; dy++) {
+                            const y = left[1] - dy - 1;
+                            ctx.fillRect(left[0] + 2 * dy, y, diamondWidth - 4 * dy, 1);
+                        }
+                        for (let dy = 0; dy < halfH; dy++) {
+                            const y = left[1] + dy;
+                            ctx.fillRect(left[0] + 2 * dy, y, diamondWidth - 4 * dy, 1);
+                        }
+
+                    }
+                }
+            }
+
+            // Draw margin boundary
+            ctx.save();
+            ctx.strokeStyle = '#e53935';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 6]);
+            ctx.strokeRect(0.5, 0.5, width - 1, height - 1);
+            ctx.restore();
+        }
+
+
+        drawBtn.onclick = function () {
+            drawGrid();
+            saveState();
+        };
+        form.onchange = function () {
+            drawGrid();
+            saveState();
+        };
+
+        // Restore state on load
+        restoreState();
+
+        exportPngBtn.onclick = function () {
+            const link = document.createElement('a');
+            link.download = 'tileset-grid.png';
+            link.href = canvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        // Initial draw
+        drawGrid();
+    </script>
+</body>
+
+</html>
