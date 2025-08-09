@@ -4,131 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tileset Reference Grid Generator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background: #f7f7f7;
-        }
-
-        .container {
-            background: #fff;
-            padding: 24px 32px 32px 32px;
-            border-radius: 12px;
-            box-shadow: 0 2px 16px #0001;
-            max-width: 98vw;
-            max-height: 98vh;
-            margin: auto;
-            overflow: auto;
-            box-sizing: border-box;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .main-layout {
-            display: flex;
-            gap: 32px;
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-        }
-
-        .sidebar {
-            min-width: 240px;
-            max-width: 280px;
-            background: #f3f6fa;
-            border-radius: 8px;
-            padding: 24px 18px 18px 18px;
-            box-shadow: 0 1px 8px #0001;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-            height: fit-content;
-            box-sizing: border-box;
-        }
-
-        .property-list {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .property-list label {
-            display: flex;
-            flex-direction: column;
-            font-size: 12px;
-            gap: 1px;
-        }
-
-        .property-list input {
-            padding: 3px 6px;
-            font-size: 13px;
-            border: 1px solid #bbb;
-            border-radius: 4px;
-            width: 100%;
-        }
-
-        .property-row-grid {
-            display: grid;
-            grid-template-columns: 50px 60px 50px 60px;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .actions {
-            text-align: center;
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .btn-small {
-            background: #1976d2;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 14px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn-small:hover {
-            background: #125ea7;
-        }
-
-        canvas {
-            display: block;
-            margin: 0 auto;
-            background: #fff;
-            border: 1px solid #bbb;
-            border-radius: 6px;
-            box-shadow: 0 1px 8px #0002;
-            max-width: 100vw;
-            max-height: 90vh;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 10px;
-            }
-
-            .inputs {
-                flex-direction: column;
-                align-items: stretch;
-            }
-        }
-    </style>
+    <title>Tile Templar - A simple tileset template generator</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div class="container">
-        <h1>Tileset Reference Grid Generator</h1>
+        <h1 style="font-size:1.6rem;margin-bottom:5px;">Tile Templar</h1>
+        <div style="font-size:1rem;color:#555;text-align:left;margin-bottom:20px;">A simple tileset template generator</div>
         <div class="main-layout">
             <aside class="sidebar">
                 <form id="gridForm" onsubmit="return false;">
@@ -140,7 +23,7 @@
                             </select>
                         </label>
                         <div style="display:flex;flex-direction:column;gap:2px;">
-                            <span style="font-size:12px;margin-bottom:2px;">Tileset Dimensions:</span>
+                            <span style="font-size:12px;margin-bottom:2px;">Tileset Size:</span>
                             <div class="property-row-grid">
                                 <span style="font-size:12px;text-align:right;">Columns:</span>
                                 <input type="number" id="tilesPerRow" min="1" value="5" required style="width:55px;">
@@ -149,7 +32,7 @@
                             </div>
                         </div>
                         <div style="display:flex;flex-direction:column;gap:2px;">
-                            <span style="font-size:12px;margin-bottom:2px;">Tile Dimensions:</span>
+                            <span style="font-size:12px;margin-bottom:2px;">Tile Size:</span>
                             <div class="property-row-grid">
                                 <span style="font-size:12px;text-align:right;">Width:</span>
                                 <input type="number" id="tileWidth" min="1" value="32" required style="width:55px;">
@@ -188,197 +71,7 @@
             </div>
         </div>
     </div>
-    <script>
-        const form = document.getElementById('gridForm');
-        const canvas = document.getElementById('tilesetCanvas');
-        const ctx = canvas.getContext('2d');
-        const drawBtn = document.getElementById('drawBtn');
-        const exportPngBtn = document.getElementById('exportPngBtn');
-
-
-
-
-        function getInputs() {
-            return {
-                gridType: document.getElementById('gridType').value,
-                tileWidth: parseInt(document.getElementById('tileWidth').value, 10),
-                tileHeight: parseInt(document.getElementById('tileHeight').value, 10),
-                margin: parseInt(document.getElementById('margin').value, 10),
-                spacing: parseInt(document.getElementById('spacing').value, 10),
-                tilesPerRow: parseInt(document.getElementById('tilesPerRow').value, 10),
-                tilesPerCol: parseInt(document.getElementById('tilesPerCol').value, 10),
-                drawPadding: parseInt(document.getElementById('drawPadding').value, 10),
-                extraHeight: parseInt(document.getElementById('extraHeight').value, 10)
-            };
-        }
-
-        // Disable height input if isometric mode is chosen
-        function updateHeightInputState() {
-            const gridType = document.getElementById('gridType').value;
-            const heightInput = document.getElementById('tileHeight');
-            const widthInput = document.getElementById('tileWidth');
-            if (gridType === 'isometric') {
-                heightInput.disabled = true;
-                heightInput.value = Math.round(widthInput.value / 2);
-            } else {
-                heightInput.disabled = false;
-            }
-        }
-
-        // Save current state to localStorage
-        function saveState() {
-            const state = getInputs();
-            localStorage.setItem('tilesetGridState', JSON.stringify(state));
-        }
-
-        // Restore state from localStorage
-        function restoreState() {
-            const stateStr = localStorage.getItem('tilesetGridState');
-            if (!stateStr) return;
-            try {
-                const state = JSON.parse(stateStr);
-                if (state.gridType) document.getElementById('gridType').value = state.gridType;
-                if (state.tileWidth) document.getElementById('tileWidth').value = state.tileWidth;
-                if (state.tileHeight) document.getElementById('tileHeight').value = state.tileHeight;
-                if (state.margin !== undefined) document.getElementById('margin').value = state.margin;
-                if (state.spacing !== undefined) document.getElementById('spacing').value = state.spacing;
-                if (state.tilesPerRow) document.getElementById('tilesPerRow').value = state.tilesPerRow;
-                if (state.tilesPerCol) document.getElementById('tilesPerCol').value = state.tilesPerCol;
-                if (state.drawPadding !== undefined) document.getElementById('drawPadding').value = state.drawPadding;
-                if (state.extraHeight !== undefined) document.getElementById('extraHeight').value = state.extraHeight;
-            } catch (e) { }
-        }
-
-        function drawGrid() {
-            const { gridType, tileWidth, tileHeight, margin, spacing, tilesPerRow, tilesPerCol, drawPadding, extraHeight } = getInputs();
-            ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
-
-            let drawRectWidth = tileWidth + 2 * drawPadding;
-            let drawRectHeight = tileHeight + 2 * drawPadding + extraHeight;
-            let width = margin * 2 + tilesPerRow * drawRectWidth + (tilesPerRow - 1) * spacing;
-            let height = margin * 2 + tilesPerCol * drawRectHeight + (tilesPerCol - 1) * spacing;
-            canvas.width = width;
-            canvas.height = height;
-            ctx.fillStyle = '#b0b0b0';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            if (gridType === 'orthogonal') {
-                // Draw filled tiles with alternating shades
-                const colorA = '#e3eafc';
-                const colorB = '#b6c8e6';
-                for (let row = 0; row < tilesPerCol; row++) {
-                    for (let col = 0; col < tilesPerRow; col++) {
-                        const drawRectX = margin + col * (drawRectWidth + spacing);
-                        const drawRectY = margin + row * (drawRectHeight + spacing);
-
-                        // Make drawable area transparent
-                        ctx.clearRect(drawRectX, drawRectY, drawRectWidth, drawRectHeight);
-
-                        const cellX = drawRectX + drawPadding;
-                        const cellY = drawRectY + drawPadding + extraHeight;
-
-                        const isEven = (row + col) % 2 === 0;
-                        ctx.fillStyle = isEven ? colorA : colorB;
-                        ctx.fillRect(cellX, cellY, tileWidth, tileHeight);
-                    }
-                }
-            } else if (gridType === 'isometric') {
-                // For Isometric, user input is tileHeight (vertical height from top to bottom), width is always double the height
-
-                const colorA = '#e3eafc';
-                const colorB = '#b6c8e6';
-                for (let row = 0; row < tilesPerCol; row++) {
-                    for (let col = 0; col < tilesPerRow; col++) {
-                        // Center of each diamond in an Orthogonal grid cell
-                        const drawRectX = margin + col * (drawRectWidth + spacing);
-                        const drawRectY = margin + row * (drawRectHeight + spacing);
-
-                        // Make drawable area transparent
-                        ctx.clearRect(drawRectX, drawRectY, drawRectWidth, drawRectHeight);
-
-                        const cellX = drawRectX + drawPadding;
-                        const cellY = drawRectY + drawPadding + extraHeight;
-
-                        const isEven = (row + col) % 2 === 0;
-                        // Pixel-perfect fill of the diamond using scanlines (classic Isometric diamond)
-                        const fillColor = isEven ? colorA : colorB;
-                        ctx.fillStyle = isEven ? colorA : colorB;
-                        // Diamond vertices (all integer math)
-                        const halfW = tileWidth / 2;
-                        const halfH = tileHeight / 2;
-                        const left = [cellX, cellY + halfH];
-
-                        for (let dy = 0; dy < halfH; dy++) {
-                            const y = left[1] - dy - 1;
-                            ctx.fillRect(left[0] + 2 * dy, y, tileWidth - 4 * dy, 1);
-                        }
-                        for (let dy = 0; dy < halfH; dy++) {
-                            const y = left[1] + dy;
-                            ctx.fillRect(left[0] + 2 * dy, y, tileWidth - 4 * dy, 1);
-                        }
-                    }
-                }
-            }
-
-            // Draw margin boundary
-            ctx.save();
-            ctx.strokeStyle = '#e53935';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([6, 6]);
-            ctx.strokeRect(0.5, 0.5, width - 1, height - 1);
-            ctx.restore();
-        }
-
-
-
-        // Remove drawBtn, grid is always redrawn on change
-        // Export TSX button logic
-        document.getElementById('exportTsxBtn').onclick = function () {
-            // Placeholder: generate a basic TSX file for the current grid
-            const { tileWidth, tileHeight, margin, spacing, tilesPerRow, tilesPerCol, drawPadding, extraHeight } = getInputs();
-            const drawRectWidth = tileWidth + 2 * drawPadding;
-            const drawRectHeight = tileHeight + 2 * drawPadding + extraHeight;
-            const width = margin * 2 + tilesPerRow * drawRectWidth + (tilesPerRow - 1) * spacing;
-            const height = margin * 2 + tilesPerCol * drawRectHeight + (tilesPerCol - 1) * spacing;
-
-            tsx = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-            tsx += `<tileset version="1.10" tiledversion="1.10.2" name="tileset" tilewidth="${drawRectWidth}" tileheight="${drawRectHeight}" tilecount="${tilesPerRow * tilesPerCol}" columns="${tilesPerRow}" spacing="${spacing}" margin="${margin}">\n`;
-            tsx += `<tileoffset x="-${drawPadding}" y="${drawPadding}"/>\n`;
-            tsx += `<image source="tileset.png" width="${width}" height="${height}"/>\n`;
-            tsx += `</tileset>`;
-            const blob = new Blob([tsx], { type: 'application/xml' });
-            const link = document.createElement('a');
-            link.download = 'tileset.tsx';
-            link.href = URL.createObjectURL(blob);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
-        form.onchange = function () {
-            updateHeightInputState();
-            drawGrid();
-            saveState();
-        };
-
-        document.getElementById('gridType').addEventListener('change', updateHeightInputState);
-
-
-        // Restore state on load
-        restoreState();
-        updateHeightInputState();
-
-        exportPngBtn.onclick = function () {
-            const link = document.createElement('a');
-            link.download = 'tileset-grid.png';
-            link.href = canvas.toDataURL('image/png');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
-
-        // Initial draw
-        drawGrid();
-    </script>
+    <script src="tileset.js"></script>
 </body>
 
 </html>
