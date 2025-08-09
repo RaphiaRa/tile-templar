@@ -19,6 +19,62 @@ document.addEventListener('DOMContentLoaded', function () {
             extraHeight: parseInt(document.getElementById('extraHeight').value, 10)
         };
     }
+    
+    function setInputs(state) {
+        if (state.gridType) document.getElementById('gridType').value = state.gridType;
+        if (state.tileWidth) document.getElementById('tileWidth').value = state.tileWidth;
+        if (state.tileHeight) document.getElementById('tileHeight').value = state.tileHeight;
+        if (state.margin !== undefined) document.getElementById('margin').value = state.margin;
+        if (state.spacing !== undefined) document.getElementById('spacing').value = state.spacing;
+        if (state.tilesPerRow) document.getElementById('tilesPerRow').value = state.tilesPerRow;
+        if (state.tilesPerCol) document.getElementById('tilesPerCol').value = state.tilesPerCol;
+        if (state.drawPadding !== undefined) document.getElementById('drawPadding').value = state.drawPadding;
+        if (state.extraHeight !== undefined) document.getElementById('extraHeight').value = state.extraHeight;
+    }
+
+    function getStateUrlParams(state) {
+        const params = new URLSearchParams();
+        for (const key of Object.keys(state)) {
+            params.set(key, state[key]);
+        }
+        return params.toString();
+    }
+
+    // On load, check for URL params and use them if present
+    function tryRestoreFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('gridType')) {
+            // Only set known keys
+            const state = {};
+            ['gridType','tileWidth','tileHeight','margin','spacing','tilesPerRow','tilesPerCol','drawPadding','extraHeight'].forEach(key => {
+                if (params.has(key)) state[key] = params.get(key);
+            });
+            setInputs(state);
+            updateHeightInputState();
+            drawGrid();
+            saveState();
+            return true;
+        }
+        return false;
+    }
+
+    if (!tryRestoreFromUrl()) {
+        restoreState();
+        updateHeightInputState();
+    }
+
+    // Share button logic
+    document.getElementById('shareBtn').onclick = function () {
+        const state = getInputs();
+        const params = getStateUrlParams(state);
+        const url = window.location.origin + window.location.pathname + '?' + params;
+        navigator.clipboard.writeText(url).then(function() {
+            document.getElementById('shareBtn').textContent = 'Copied!';
+            setTimeout(() => {
+                document.getElementById('shareBtn').textContent = 'Share';
+            }, 1200);
+        });
+    };
 
     function updateHeightInputState() {
         const gridType = document.getElementById('gridType').value;
