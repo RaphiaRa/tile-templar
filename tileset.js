@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
             extraHeight: parseInt(document.getElementById('extraHeight').value, 10)
         };
     }
-    
+
     function setInputs(state) {
         if (state.gridType) document.getElementById('gridType').value = state.gridType;
         if (state.tileWidth) document.getElementById('tileWidth').value = state.tileWidth;
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (params.has('gridType')) {
             // Only set known keys
             const state = {};
-            ['gridType','tileWidth','tileHeight','margin','spacing','tilesPerRow','tilesPerCol','drawPadding','extraHeight'].forEach(key => {
+            ['gridType', 'tileWidth', 'tileHeight', 'margin', 'spacing', 'tilesPerRow', 'tilesPerCol', 'drawPadding', 'extraHeight'].forEach(key => {
                 if (params.has(key)) state[key] = params.get(key);
             });
             setInputs(state);
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const state = getInputs();
         const params = getStateUrlParams(state);
         const url = window.location.origin + window.location.pathname + '?' + params;
-        navigator.clipboard.writeText(url).then(function() {
+        navigator.clipboard.writeText(url).then(function () {
             document.getElementById('shareBtn').textContent = 'Copied!';
             setTimeout(() => {
                 document.getElementById('shareBtn').textContent = 'Share';
@@ -104,13 +104,21 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const state = JSON.parse(stateStr);
             if (state.tileWidth) document.getElementById('tileWidth').value = state.tileWidth;
+            else document.getElementById('tileWidth').value = 32;
             if (state.tileHeight) document.getElementById('tileHeight').value = state.tileHeight;
+            else document.getElementById('tileHeight').value = 32;
             if (state.margin !== undefined) document.getElementById('margin').value = state.margin;
+            else document.getElementById('margin').value = 0;
             if (state.spacing !== undefined) document.getElementById('spacing').value = state.spacing;
+            else document.getElementById('spacing').value = 0;
             if (state.tilesPerRow) document.getElementById('tilesPerRow').value = state.tilesPerRow;
+            else document.getElementById('tilesPerRow').value = 5;
             if (state.tilesPerCol) document.getElementById('tilesPerCol').value = state.tilesPerCol;
+            else document.getElementById('tilesPerCol').value = 5;
             if (state.drawPadding !== undefined) document.getElementById('drawPadding').value = state.drawPadding;
+            else document.getElementById('drawPadding').value = 0;
             if (state.extraHeight !== undefined) document.getElementById('extraHeight').value = state.extraHeight;
+            else document.getElementById('extraHeight').value = 0;
         } catch (e) { }
     }
 
